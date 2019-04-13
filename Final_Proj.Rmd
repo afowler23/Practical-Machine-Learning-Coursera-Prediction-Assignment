@@ -111,6 +111,15 @@ plot(ranForest, main = "Random Forest Model Error by # of Trees")
 ```
 The random forest prediction produced better results wit an accuracy of 100%
 
+
+## Out of Sample Error
+```{r,  echo=TRUE}
+OUSerror <- predict(ranForest,dataTest)
+acc <- sum(OUSerror == dataTest$classe) / length(OUSerror)
+print(acc)
+```
+Out of sample error is 100% also.
+
 Plotting matrix results
 ```{r,  echo=TRUE}
 plot(confusionFor$table, col = confusionFor$byClass, 
