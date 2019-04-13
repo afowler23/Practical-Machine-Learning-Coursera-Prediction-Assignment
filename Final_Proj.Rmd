@@ -96,7 +96,7 @@ confusionTree <- confusionMatrix(testTree, dataTest$classe)
 confusionTree
 
 plot(confusionTree$table, col = confusionTree$byClass, 
-     main = paste("Random Forest - Accuracy =",
+     main = paste("Decision Tree - Accuracy =",
                   round(confusionTree$overall['Accuracy'], 4)))
 ```
 The accuracy rate of the model is 0.7336. 
