@@ -13,28 +13,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Background
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har> (see the section on the Weight Lifting Exercise Dataset).
 
-
 ## Goal
-
 The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
 
 ## Data
-
-The training data for this project are available here:
-
-<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv>
-
-The test data are available here:
-
-<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
-
 The data for this project come from this source: <http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har>.
 
 ## Loading data and required packages
-
 You can also embed plots, for example:
-
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(caret)
 library(rpart)
 library(rpart.plot)
@@ -44,21 +31,18 @@ library(randomForest)
 library(knitr)
 ```
 
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 training <- read.csv('./pml-training.csv', header=T)
 testing <- read.csv('./pml-testing.csv', header=T)
 dim(training)
 dim(testing)
 str(training)
 ```
-
-
 Both datasets have 160 variables. The training data set has NA values or blank values in some of the columns so we will need to remove them. 
 
 ## Cleaining data
-
 Let's remove the variables that contain missing values
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 dataTrain <- training[, colSums(is.na(training)) == 0]
 dataTest<- testing[, colSums(is.na(testing)) == 0]
 dim(dataTrain)
@@ -67,7 +51,7 @@ dim(dataTest)
 
 Next let's remove the first 7 variables that are considered as identification variables 
 and have little affect on the outcome classe
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 dataTrain <- dataTrain[, -c(1:7)]
 dataTest <- dataTest[, -c(1:7)]
 
@@ -78,9 +62,8 @@ dim(dataTrain)
 dim(dataTest)
 ```
 
-
 Creating a partition with the training dataset. (70% as train data and 30% as test data)
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 set.seed(12345)
 inTrain <- createDataPartition(dataTrain$classe, p = 0.7, list = FALSE)
 dataTrain <- dataTrain[inTrain, ]
@@ -90,26 +73,24 @@ dim(dataTest)
 ```
 
 Let's remove the Near Zero Variance variables.
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 nZeroVar <- nearZeroVar(dataTrain)
 dataTrain <- dataTrain[, -nZeroVar]
 dataTest <- dataTest[, -nZeroVar]
 dim(dataTrain)
 dim(dataTest)
 ```
-
 This leaves us with 53 variables.
 
-
 ## Prediction using Decision Trees
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 set.seed(12345)
 trainTree <- rpart(classe ~ ., data = dataTrain, method = "class")
 fancyRpartPlot(trainTree)
 ```
 
 Let's validate the tree model on the dataTest to find out how well it performs 
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 testTree <- predict(trainTree, dataTest, type = "class")
 confusionTree <- confusionMatrix(testTree, dataTest$classe)
 confusionTree
@@ -118,11 +99,10 @@ plot(confusionTree$table, col = confusionTree$byClass,
      main = paste("Random Forest - Accuracy =",
                   round(confusionTree$overall['Accuracy'], 4)))
 ```
-
 The accuracy rate of the model is 0.7336. 
 
 ## Prediction using Random Forest
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 ranForest <-  randomForest(classe ~ ., dataTrain)
 testForest <- predict(ranForest, dataTest, type = "class")
 confusionFor <- confusionMatrix(testForest, dataTest$classe)
@@ -132,20 +112,19 @@ plot(ranForest, main = "Random Forest Model Error by # of Trees")
 The random forest prediction produced better results wit an accuracy of 100%
 
 Plotting matrix results
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 plot(confusionFor$table, col = confusionFor$byClass, 
      main = paste("Random Forest - Accuracy =",
                   round(confusionFor$overall['Accuracy'], 4)))
 ```
 
 ## Prediction with Boosting method
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 gbmFit<- train(classe ~ ., method ="gbm", data = dataTrain, verbose = FALSE)
 gbmFit
 
 # Plot results
 plot(gbmFit)
-
 
 predictTrain <- predict(gbmFit, newdata = dataTest)
 confusionGBM <- confusionMatrix(dataTest$classe, predictTrain)
@@ -156,9 +135,7 @@ confusionGBM$overall[1]
 ```
 GBM accuracy is 0.9751
 
-
 ## Conclusion
-
 The accuracy of the three models are below:
 Decision Tree: 73%
 Random Forest:100%
@@ -167,7 +144,7 @@ GBM: 97%
 ## Predicting results using Test Data
 From this, we see that Random Forest is the best to predict and should be applied to predict the 20 quiz results shown below:
 
-```{r, echo=FALSE}
+```{r,  echo=TRUE}
 predictTesting <- predict(ranForest, newdata = testing)
 predictTesting
 ```
